@@ -1,4 +1,4 @@
-#include "gmod/Interface.h"
+#include "GarrysMod/Lua/Interface.h"
 #include "sourcestuff.h"
 
 typedef unsigned int uint;
