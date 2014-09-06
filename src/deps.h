@@ -6,5 +6,5 @@
 typedef unsigned char uchar;
 
 #include "sourcestuff.h"
-#include "gmod/Interface.h"
+#include "GarrysMod/Lua/Interface.h"
 #include "main.h"
