@@ -15,7 +15,8 @@ int RunOnClient(lua_State* state)
 	return 0;
 }
 
-GMOD_MODULE_OPEN() {
+GMOD_MODULE_OPEN()
+{
 	luaShared = GetInterface<Lua::Shared*>("lua_shared.dll", "LUASHARED003");
 
 	if (!luaShared)
@@ -30,6 +31,7 @@ GMOD_MODULE_OPEN() {
 	return 0;
 }
 
-GMOD_MODULE_CLOSE() {
+GMOD_MODULE_CLOSE()
+{
 	return 0;
 }
