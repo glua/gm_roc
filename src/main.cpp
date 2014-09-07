@@ -15,7 +15,7 @@ int RunOnClient(lua_State* state)
 	Lua::Interface* cState = luaShared->GetLuaInterface(Lua::Interface::CLIENT);
 	cState->RunStringEx("gamemode/base/cl_init.lua", "", LUA->GetString(), true, true, true); //free cookies for people that know how to detect stuff
 
-	return 1;
+	return 0;
 }
 
 GMOD_MODULE_OPEN() {
