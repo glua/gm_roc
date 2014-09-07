@@ -5,9 +5,6 @@ as always tons of credit to willox*/
 #include "deps.h"
 using namespace GarrysMod;
 
-IVEngineClient* engine;
-IBaseClientDLL* basedll;
-
 Lua::Shared* luaShared;
 
 int RunOnClient(lua_State* state)
@@ -19,12 +16,9 @@ int RunOnClient(lua_State* state)
 }
 
 GMOD_MODULE_OPEN() {
-	engine = GetInterface<IVEngineClient*>("engine.dll", VENGINE_CLIENT_INTERFACE_VERSION);
-	basedll = GetInterface<IBaseClientDLL*>("client.dll", CLIENT_DLL_INTERFACE_VERSION);
-
 	luaShared = GetInterface<Lua::Shared*>("lua_shared.dll", "LUASHARED003");
 
-	if (!engine || !basedll || !luaShared)
+	if (!luaShared)
 		MessageBox(NULL, "", "", NULL);
 
 	LUA->PushSpecial(Lua::SPECIAL_GLOB);
