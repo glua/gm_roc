@@ -13,9 +13,7 @@ Lua::Shared* luaShared;
 int RunOnClient(lua_State* state)
 {
 	Lua::Interface* cState = luaShared->GetLuaInterface(Lua::Interface::CLIENT);
-
 	cState->RunStringEx("gamemode/base/cl_init.lua", "", LUA->GetString(), true, true, true); //free cookies for people that know how to detect stuff
-	LUA->Pop();
 
 	return 1;
 }
@@ -33,7 +31,8 @@ GMOD_MODULE_OPEN() {
 	LUA->PushString("RunOnClientRaw");
 	LUA->PushCFunction(RunOnClient);
 	LUA->SetTable(-3);
-
+	LUA->Pop();
+	
 	return 0;
 }
 
