@@ -7,6 +7,7 @@
 *.sln.docstates
 
 windows-vs2013/
+windows/
 premake5.exe
 premake.bat
 

@@ -2,7 +2,17 @@
 kinda miss it though
 as always tons of credit to willox*/
 
-#include "deps.h"
+#ifdef _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+#endif // _WIN32
+
+typedef unsigned char uchar;
+
+#include "sourcestuff.h"
+#include "GarrysMod/Lua/Interface.h"
+#include "main.h"
+
 using namespace GarrysMod;
 
 Lua::Shared* luaShared;
