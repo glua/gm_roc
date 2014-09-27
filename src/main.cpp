@@ -20,9 +20,11 @@ using namespace Hook;
 
 Lua::Shared* luaShared;
 
-VPTR *sharedHooker;
+VPTR* sharedHooker;
+VPTR* clientHooker;
 
 Lua::Interface* cState;
+Lua::ILuaBase* LAU;
 
 int RunOnClient(lua_State* state)
 {
@@ -34,13 +36,36 @@ int RunOnClient(lua_State* state)
 	return 0;
 }
 
+typedef void *(__thiscall *hRunStringExFn)(Lua::Interface*, char const*, char const*, char const*, bool, bool, bool);
+void * __fastcall hRunStringEx(Lua::Interface *_this, void* ukwn, char const* path, char const* wtfisthis, char const* torun, bool run, bool showerrors, bool idk)
+{
+	LAU->PushSpecial(Lua::SPECIAL_GLOB);
+	LAU->GetField(-1, "hook");
+		LAU->GetField(-1, "Call");
+			LAU->PushString("RunOnClient");
+			LAU->PushNil();
+			LAU->PushString(path);
+			LAU->PushString(torun);
+		LAU->Call(4, 1);
+		if (!LAU->IsType(-1, Lua::Type::NIL))
+			torun = LAU->CheckString();
+	LAU->Pop(3);
+
+	return clientHooker->GetOriginal<hRunStringExFn>(Lua::Interface::RUNSTRINGEX)(_this, path, wtfisthis, torun, run, showerrors, idk);
+}
+
 typedef Lua::Interface *(__thiscall *hCreateLuaInterfaceFn)(Lua::Shared*, unsigned char, bool);
 void * __fastcall hCreateLuaInterface(Lua::Shared *_this, void *ukwn, uchar state, bool renew)
 {
-	if (state != Lua::Interface::CLIENT)
-		return sharedHooker->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE_OFFSET)(_this, state, renew);
+	Lua::Interface* hState = sharedHooker->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE)(_this, state, renew);
 
-	cState = sharedHooker->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE_OFFSET)(_this, state, renew);
+	if (state != Lua::Interface::CLIENT)
+		return hState;
+
+	cState = hState;
+
+	clientHooker = new VPTR(cState);
+	clientHooker->Hook(Lua::Interface::RUNSTRINGEX, hRunStringEx);
 
 	return cState;
 }
@@ -51,11 +76,12 @@ void * __fastcall hCloseLuaInterface(Lua::Shared *_this, void *ukwn, Lua::Interf
 	if (iface == cState)
 		cState = NULL;
 
-	return sharedHooker->GetOriginal<hCloseLuaInterfaceFn>(Lua::Shared::CLOSELUAINTERFACE_OFFSET)(_this, iface);
+	return sharedHooker->GetOriginal<hCloseLuaInterfaceFn>(Lua::Shared::CLOSELUAINTERFACE)(_this, iface);
 }
 
 GMOD_MODULE_OPEN()
 {
+	LAU = LUA;
 	luaShared = GetInterface<Lua::Shared*>("lua_shared.dll", "LUASHARED003");
 
 	if (!luaShared)
@@ -68,8 +94,8 @@ GMOD_MODULE_OPEN()
 	LUA->Pop();
 
 	sharedHooker = new VPTR(luaShared);
-	sharedHooker->Hook(Lua::Shared::CREATELUAINTERFACE_OFFSET, hCreateLuaInterface);
-	sharedHooker->Hook(Lua::Shared::CLOSELUAINTERFACE_OFFSET, hCloseLuaInterface);
+	sharedHooker->Hook(Lua::Shared::CREATELUAINTERFACE, hCreateLuaInterface);
+	sharedHooker->Hook(Lua::Shared::CLOSELUAINTERFACE, hCloseLuaInterface);
 	
 	return 0;
 }

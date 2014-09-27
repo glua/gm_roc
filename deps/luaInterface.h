@@ -23,7 +23,8 @@ namespace GarrysMod {
 			enum {
 				CLIENT,
 				SERVER,
-				MENU
+				MENU,
+				RUNSTRINGEX = 107 //offset
 			};
 
 			static const char* Names[];

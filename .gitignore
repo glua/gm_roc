@@ -18,6 +18,7 @@ premake.bat
 x64/
 build/
 bld/
+bin/
 [Oo]bj/
 
 # MSTest test Results
@@ -176,3 +177,4 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+*.exp

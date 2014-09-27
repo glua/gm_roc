@@ -4,9 +4,9 @@ namespace GarrysMod {
 		class Shared {
 		public:
 
-			enum {
-				CREATELUAINTERFACE_OFFSET = 4,
-				CLOSELUAINTERFACE_OFFSET = 5
+			enum { //offsets
+				CREATELUAINTERFACE= 4,
+				CLOSELUAINTERFACE = 5
 			};
 
 			virtual				~Shared() = 0;
