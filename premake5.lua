@@ -2,7 +2,7 @@ dofile("../../common.lua")
 
 RequireDefaultlibs()
 
-SOLUTION 	"gm_roc"
+SOLUTION 	"roc"
 
 targetdir	"bin"
 INCLUDES	"source_sdk"
