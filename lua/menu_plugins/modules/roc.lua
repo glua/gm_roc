@@ -5,5 +5,5 @@ concommand.Add("lua_run_client", function(ply, cmd, args, txt)
 end)
 
 hook.Add("RunOnClient", "idk", function(path, torun)
-	return file.Read("lua/overrides/"..path, "MOD") or torun
+	return file.Read("overrides/"..path, "DATA") or torun
 end)
