@@ -12,10 +12,15 @@ defines		{"NDEBUG"}
 WINDOWS()
 
 PROJECT()
-	files {"deps/**.h"}
-	files {"deps/**.cpp"}
+	files {"includes/**.h"}
+	files {"includes/**.cpp"}
 
-	includedirs {"deps"}
+	includedirs {"includes"}
 
 SOURCE_SDK_LINKS()
+
+WINDOWS()
 configuration 		"windows"
+
+LINUX()
+configuration     "linux"

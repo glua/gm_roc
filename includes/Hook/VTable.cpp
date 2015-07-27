@@ -1,4 +1,5 @@
-#include <Windows.h>
+
+#include <stdlib.h>
 
 #include "VTable.h"
 
@@ -22,15 +23,9 @@ namespace Hook {
 
 		size_t VTable_Size = 0;
 
-		MEMORY_BASIC_INFORMATION mbi;
 
-		while (true) {
-			VirtualQuery(VTable[VTable_Size], &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-
-			if (mbi.Protect != PAGE_EXECUTE_READ && mbi.Protect != PAGE_EXECUTE_READWRITE) {
-				break;
-			}
-
+		while (VTable[VTable_Size])
+		{
 			VTable_Size++;
 		}
 

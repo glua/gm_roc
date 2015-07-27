@@ -1,4 +1,5 @@
-#include <Windows.h>
+
+#include <stdlib.h>
 
 #include "VPTR.h"
 #include "VTable.h"

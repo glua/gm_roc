@@ -2,16 +2,15 @@
 kinda miss it though
 as always tons of credit to willox*/
 
-#ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <Windows.h>
-#endif // _WIN32
-
 typedef unsigned char uchar;
 
 #include "sourcestuff.h"
 #include "GarrysMod/Lua/Interface.h"
-#include "main.h"
+
+#include "luaInterface.h"
+#include "interface.h"
+#include "conv.h"
+#include "shared.h"
 
 #include "Hook/VPTR.h"
 
@@ -20,13 +19,13 @@ using namespace Hook;
 
 Lua::Shared* luaShared;
 
-VPTR* sharedHooker;
-VPTR* clientHooker;
+VPTR* luashared_vt;
+VPTR* client_vt;
 
 Lua::Interface* cState;
 Lua::ILuaBase* LAU;
 
-int RunOnClient(lua_State* state)
+int RunOnClient(lua_State *state)
 {
 	if (!cState)
 		LUA->ThrowError("Not in game");
@@ -37,7 +36,7 @@ int RunOnClient(lua_State* state)
 }
 
 typedef void *(__thiscall *hRunStringExFn)(Lua::Interface*, char const*, char const*, char const*, bool, bool, bool);
-void * __fastcall hRunStringEx(Lua::Interface *_this, void* ukwn, char const* path, char const* wtfisthis, char const* torun, bool run, bool showerrors, bool idk)
+void *__hook hRunStringEx(Lua::Interface *ths, HOOK_EDX(void *) const char *path, const char *wtfisthis, const char *torun, bool run, bool showerrors, bool idk)
 {
 	LAU->PushSpecial(Lua::SPECIAL_GLOB);
 	LAU->GetField(-1, "hook");
@@ -51,32 +50,32 @@ void * __fastcall hRunStringEx(Lua::Interface *_this, void* ukwn, char const* pa
 			torun = LAU->CheckString();
 	LAU->Pop(3);
 
-	return clientHooker->GetOriginal<hRunStringExFn>(Lua::Interface::RUNSTRINGEX)(_this, path, wtfisthis, torun, run, showerrors, idk);
+	return client_vt->GetOriginal<hRunStringExFn>(Lua::Interface::RUNSTRINGEX)(ths, path, wtfisthis, torun, run, showerrors, idk);
 }
 
 typedef Lua::Interface *(__thiscall *hCreateLuaInterfaceFn)(Lua::Shared*, unsigned char, bool);
-void * __fastcall hCreateLuaInterface(Lua::Shared *_this, void *ukwn, uchar state, bool renew)
+void *__hook hCreateLuaInterface(Lua::Shared *ths, HOOK_EDX(void *) uchar state, bool renew)
 {
-	Lua::Interface* hState = sharedHooker->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE)(_this, state, renew);
+	Lua::Interface* hState = luashared_vt->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE)(ths, state, renew);
 
 	if (state != Lua::Interface::CLIENT)
 		return hState;
 
 	cState = hState;
 
-	clientHooker = new VPTR(cState);
-	clientHooker->Hook(Lua::Interface::RUNSTRINGEX, hRunStringEx);
+	client_vt = new VPTR(cState);
+	client_vt->Hook(Lua::Interface::RUNSTRINGEX, (void *)&hRunStringEx);
 
 	return cState;
 }
 
-typedef void *(__thiscall *hCloseLuaInterfaceFn)(Lua::Shared*, Lua::Interface*);
-void * __fastcall hCloseLuaInterface(Lua::Shared *_this, void *ukwn, Lua::Interface* iface)
+typedef void *(__thiscall *hCloseLuaInterfaceFn)(Lua::Shared *, Lua::Interface *);
+void *__hook hCloseLuaInterface(Lua::Shared *ths, HOOK_EDX(void *) Lua::Interface *iface)
 {
 	if (iface == cState)
 		cState = NULL;
 
-	return sharedHooker->GetOriginal<hCloseLuaInterfaceFn>(Lua::Shared::CLOSELUAINTERFACE)(_this, iface);
+	return luashared_vt->GetOriginal<hCloseLuaInterfaceFn>(Lua::Shared::CLOSELUAINTERFACE)(ths, iface);
 }
 
 GMOD_MODULE_OPEN()
@@ -84,19 +83,16 @@ GMOD_MODULE_OPEN()
 	LAU = LUA;
 	luaShared = GetInterface<Lua::Shared*>("lua_shared.dll", "LUASHARED003");
 
-	if (!luaShared)
-		MessageBox(NULL, "", "", NULL);
-
 	LUA->PushSpecial(Lua::SPECIAL_GLOB);
 	LUA->PushString("RunOnClient");
 	LUA->PushCFunction(RunOnClient);
 	LUA->SetTable(-3);
 	LUA->Pop();
 
-	sharedHooker = new VPTR(luaShared);
-	sharedHooker->Hook(Lua::Shared::CREATELUAINTERFACE, hCreateLuaInterface);
-	sharedHooker->Hook(Lua::Shared::CLOSELUAINTERFACE, hCloseLuaInterface);
-	
+	luashared_vt = new VPTR(luaShared);
+	luashared_vt->Hook(Lua::Shared::CREATELUAINTERFACE, (void *)&hCreateLuaInterface);
+	luashared_vt->Hook(Lua::Shared::CLOSELUAINTERFACE, (void *)&hCloseLuaInterface);
+
 	return 0;
 }
 
