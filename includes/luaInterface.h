@@ -1,5 +1,5 @@
 #include "GarrysMod/Lua/Interface.h"
-#include "sourcestuff.h"
+#include <cdll_int.h>
 
 typedef unsigned int uint;
 

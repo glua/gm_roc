@@ -4,11 +4,11 @@ as always tons of credit to willox*/
 
 typedef unsigned char uchar;
 
-#include "sourcestuff.h"
+#include <interface.h>
+#include <cdll_int.h>
 #include "GarrysMod/Lua/Interface.h"
 
 #include "luaInterface.h"
-#include "interface.h"
 #include "conv.h"
 #include "shared.h"
 
