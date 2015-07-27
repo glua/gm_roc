@@ -12,18 +12,17 @@ typedef unsigned char uchar;
 #include "conv.h"
 #include "shared.h"
 
-#include "Hook/VPTR.h"
+#include "vtable.h"
 
 using namespace GarrysMod;
-using namespace Hook;
 
 Lua::Shared* luaShared;
 
-VPTR* luashared_vt;
-VPTR* client_vt;
+VTable *luashared_vt;
+VTable *client_vt;
 
-Lua::Interface* cState;
-Lua::ILuaBase* LAU;
+Lua::Interface *cState;
+Lua::ILuaBase *LAU;
 
 int RunOnClient(lua_State *state)
 {
@@ -50,21 +49,21 @@ void *__hook hRunStringEx(Lua::Interface *ths, HOOK_EDX(void *) const char *path
 			torun = LAU->CheckString();
 	LAU->Pop(3);
 
-	return client_vt->GetOriginal<hRunStringExFn>(Lua::Interface::RUNSTRINGEX)(ths, path, wtfisthis, torun, run, showerrors, idk);
+	return hRunStringExFn(client_vt->getold(Lua::Interface::RUNSTRINGEX))(ths, path, wtfisthis, torun, run, showerrors, idk);
 }
 
 typedef Lua::Interface *(__thiscall *hCreateLuaInterfaceFn)(Lua::Shared*, unsigned char, bool);
 void *__hook hCreateLuaInterface(Lua::Shared *ths, HOOK_EDX(void *) uchar state, bool renew)
 {
-	Lua::Interface* hState = luashared_vt->GetOriginal<hCreateLuaInterfaceFn>(Lua::Shared::CREATELUAINTERFACE)(ths, state, renew);
+	Lua::Interface* hState = hCreateLuaInterfaceFn(luashared_vt->getold(Lua::Shared::CREATELUAINTERFACE))(ths, state, renew);
 
 	if (state != Lua::Interface::CLIENT)
 		return hState;
 
 	cState = hState;
 
-	client_vt = new VPTR(cState);
-	client_vt->Hook(Lua::Interface::RUNSTRINGEX, (void *)&hRunStringEx);
+	client_vt = new VTable(cState);
+	client_vt->hook(Lua::Interface::RUNSTRINGEX, (void *)&hRunStringEx);
 
 	return cState;
 }
@@ -75,23 +74,23 @@ void *__hook hCloseLuaInterface(Lua::Shared *ths, HOOK_EDX(void *) Lua::Interfac
 	if (iface == cState)
 		cState = NULL;
 
-	return luashared_vt->GetOriginal<hCloseLuaInterfaceFn>(Lua::Shared::CLOSELUAINTERFACE)(ths, iface);
+	return hCloseLuaInterfaceFn(luashared_vt->getold(Lua::Shared::CLOSELUAINTERFACE))(ths, iface);
 }
 
 GMOD_MODULE_OPEN()
 {
 	LAU = LUA;
-	luaShared = GetInterface<Lua::Shared*>("lua_shared.dll", "LUASHARED003");
+	luaShared = GetInterface<Lua::Shared*>("lua_shared", "LUASHARED003");
 
 	LUA->PushSpecial(Lua::SPECIAL_GLOB);
-	LUA->PushString("RunOnClient");
-	LUA->PushCFunction(RunOnClient);
-	LUA->SetTable(-3);
+		LUA->PushString("RunOnClient");
+		LUA->PushCFunction(RunOnClient);
+		LUA->SetTable(-3);
 	LUA->Pop();
 
-	luashared_vt = new VPTR(luaShared);
-	luashared_vt->Hook(Lua::Shared::CREATELUAINTERFACE, (void *)&hCreateLuaInterface);
-	luashared_vt->Hook(Lua::Shared::CLOSELUAINTERFACE, (void *)&hCloseLuaInterface);
+	luashared_vt = new VTable(luaShared);
+	luashared_vt->hook(Lua::Shared::CREATELUAINTERFACE, (void *)&hCreateLuaInterface);
+	luashared_vt->hook(Lua::Shared::CLOSELUAINTERFACE, (void *)&hCloseLuaInterface);
 
 	return 0;
 }

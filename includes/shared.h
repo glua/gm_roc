@@ -5,8 +5,13 @@ namespace GarrysMod {
 		public:
 
 			enum { //offsets
+#ifdef _WIN32
 				CREATELUAINTERFACE= 4,
 				CLOSELUAINTERFACE = 5
+#else
+				CREATELUAINTERFACE= 5,
+				CLOSELUAINTERFACE = 6
+#endif
 			};
 
 			virtual				~Shared() = 0;
