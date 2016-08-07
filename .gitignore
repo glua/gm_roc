@@ -11,6 +11,8 @@ windows/
 premake5.exe
 premake.bat
 
+proj/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
