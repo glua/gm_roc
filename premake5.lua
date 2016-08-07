@@ -1,21 +1,37 @@
-dofile("../../common.lua")
+solution "gm_roc2"
+	language "C++"
+	location "./proj"
 
-RequireDefaultlibs()
+	architecture "x86"
 
-SOLUTION 	"roc"
+	configurations "Release"
 
-targetdir	"bin"
-INCLUDES	"source_sdk"
-INCLUDES 	"gmod_sdk"
-defines		{"NDEBUG"}
+	configuration "Release"
+		defines {"NDEBUG"}
+		optimize "On"
 
-WINDOWS()
+	project "gmsv_roc2_win32"
+		flags "StaticRuntime"
+		kind "SharedLib"
 
-PROJECT()
-	files {"deps/**.h"}
-	files {"deps/**.cpp"}
+		targetdir "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/garrysmod/lua/bin"
 
-	includedirs {"deps"}
+		buildoptions {"/Os", "/MP", "/arch:SSE2"}
 
-SOURCE_SDK_LINKS()
-configuration 		"windows"
+		includedirs {
+			"include",
+			"src"
+		}
+
+		files {
+			"src/**.cpp",
+			"src/**.hpp",
+			"src/**.h",
+		}
+
+		defines {
+			"GMMODULE",
+			"WIN32",
+			"_WINDOWS",
+			"_USRDLL"
+		}

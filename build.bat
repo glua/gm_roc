@@ -1,4 +1,4 @@
 @echo off
 echo Generating Windows project...
-premake5 --os=windows vs2013
+premake5 vs2015
 echo.
