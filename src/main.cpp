@@ -5,7 +5,7 @@
 
 #define CREATELUAINTERFACE 4
 #define CLOSELUAINTERFACE 5
-#define RUNSTRINGEX 107
+#define RUNSTRINGEX 111
 
 typedef unsigned char uchar;
 
